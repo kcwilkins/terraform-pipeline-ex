@@ -1,11 +1,12 @@
 .SILENT:
 VERSION = v1
-IMAGE_NAME ?= registry.gitlab.com/kcwest/octain/infra/cicd:$(VERSION)
+USERNAME = kcwilkins
+IMAGE_NAME ?= ghcr.io/kcwilkins/terraform-pipeline-ex/cicd:$(VERSION)
 TAG = $(VERSION)
-OCTAIN_PROD_PROFILE = aws_octain_prod
-OCTAIN_PROD_ECR = 867364193007.dkr.ecr.us-west-1.amazonaws.com
-OCTAIN_PROD_IMAGE ?= 867364193007.dkr.ecr.us-west-1.amazonaws.com/octain-server:latest
-OCTAIN_ECR_IMAGE ?= registry.gitlab.com/kcwest/octain/infra/octain-ecs:latest
+
+.PHONY: help
+help:
+	echo "Add help and command list here"
 
 .PHONY: build
 build:
@@ -28,20 +29,15 @@ shell:
 
 .PHONY: push
 push:
-	docker login registry.gitlab.com
+	# https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry
+
+	echo "To create a PAT - https://github.com/settings/tokens"
+	echo "Provide the login into GitHub Docker Repository using the following syntax:"
+	echo "export CR_PAT=\"<your personal access token>\""
+	echo "export USERNAME=\"<your github username>\""
+	echo ""
+	echo "Calling: echo ${CR_PAT} | docker login ghcr.io -u ${USERNAME} --password-stdin"
+	echo ${CR_PAT} | docker login ghcr.io -u ${USERNAME} --password-stdin
 	echo "Pushing ${IMAGE_NAME}"
 	docker push ${IMAGE_NAME}
 
-.PHONY: pull_octain_prod
-pull_octain_prod:
-	aws ecr get-login-password --profile ${OCTAIN_PROD_PROFILE} --region us-west-1 | docker login --username AWS --password-stdin ${OCTAIN_PROD_ECR}
-	echo "Pulling ${OCTAIN_PROD_IMAGE}"
-	docker pull ${OCTAIN_PROD_IMAGE}
-
-.PHONY: push_ecs
-push_ecs:
-	echo "Retagging ${OCTAIN_PROD_IMAGE} to ${OCTAIN_ECR_IMAGE}"
-	docker tag ${OCTAIN_PROD_IMAGE} ${OCTAIN_ECR_IMAGE}
-	docker login registry.gitlab.com
-	echo "Pushing ${OCTAIN_ECR_IMAGE}"
-	docker push ${OCTAIN_ECR_IMAGE}

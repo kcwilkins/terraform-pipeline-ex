@@ -16,21 +16,37 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  build:
+  test_credentials:
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: ghcr.io/kcwilkins/terraform-pipeline-ex/cicd:v1
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
-
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
 
       # Runs a set of commands using the runners shell
       - name: Run a multi-line script
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+         ls -laR
+         pwd
+         echo "Configure AWS Credentials"
+         export AWS_CREDENTIALS=$AWS_CREDENTIALS_DEV
+         export AWS_CONFIG=$AWS_CONFIG_DEV
+         echo "AWS_CREDENTIALS $AWS_CREDENTIALS"
+         echo "AWS_CONFIG $AWS_CONFIG"
+         mkdir -p ~/.aws
+         echo "$AWS_CREDENTIALS" | base64 -d > ~/.aws/credentials
+         echo "$AWS_CONFIG" | base64 -d > ~/.aws/config
+         chmod 600 ~/.aws/*
+         echo "Configure SSH Keys"
+         mkdir -p ~/.ssh
+         echo "$SSH_PRIVATE_KEY_DEV" | base64 -d > /root/.ssh/id_rsa
+         echo "$SSH_PUBLIC_KEY_DEV" | base64 -d > /root/.ssh/id_rsa.pub
+         chmod 600 /root/.ssh/*
+         chmod -R 755 /builds/kcwest/octain/infra/playbooks
+         echo Log into container registry User $CI_REGISTRY_USER Pass $CI_REGISTRY_PASSWORD @ $CI_REGISTRY
+         echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+
+
