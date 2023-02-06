@@ -1,7 +1,6 @@
 name: "Terraform AWS"
 
-on:
-  workflow_call:
+on: [workflow_dispatch]
 
 jobs:
   aws_terraform_versions:
