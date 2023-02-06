@@ -18,7 +18,11 @@ jobs:
   # This workflow contains a single job called "build"
   test_credentials:
     runs-on: ubuntu-latest
-    container: ghcr.io/kcwilkins/terraform-pipeline-ex/cicd:v1
+    container: 
+      image: ghcr.io/kcwilkins/terraform-pipeline-ex/cicd:v1
+      permissions:
+        contents: read  #  to fetch code (actions/checkout)
+        packages: read  #  to fetch packages (docker)
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
